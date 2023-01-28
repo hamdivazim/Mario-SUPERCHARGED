@@ -40,7 +40,7 @@ jump_fx.set_volume(0.6)
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT // ROWS
-TILE_TYPES = 15
+TILE_TYPES = 23
 world = 1
 level = 1
 
@@ -65,6 +65,7 @@ def draw_bg():
 # Sprite groups
 decor_group = pygame.sprite.Group()
 mushroom_group = pygame.sprite.Group()
+particle_group = pygame.sprite.Group()
 
 # Classes
 class TileSprite(pygame.sprite.Sprite):
@@ -90,9 +91,11 @@ class World():
         self.tile_images = tile_images
         self.TILE_SIZE = tile_size
 
-        self.tile_animation = -1
+        self.ani_frame = 0
 
         self.screen_scroll = screen_scroll
+
+        self.total_screen_scroll = 0
 
     def process_data(self, data):
         self.level_length = len(data[0])
@@ -117,10 +120,16 @@ class World():
                         decor_group.add(decoration)
                     elif tile == 10:
                         self.obstacle_list.append(tile_data)
+                    elif tile == 15:
+                        self.obstacle_list.append(tile_data)
 
     def sprout_mushroom(self, tile, x, tile_size):
         mushroom = items.Mushroom(x, ((tile[4]-1)*tile_size), tile_size)
         mushroom_group.add(mushroom)
+
+    def spawn_coin_particle(self, tile):
+        coin = items.CoinParticle(tile, TILE_SIZE, self.total_screen_scroll)
+        particle_group.add(coin)
 
     def upgrade_player(self):
         if not self.player.power > 0:
@@ -136,11 +145,18 @@ class World():
 
     def draw(self, screen):
         self.screen_scroll = screen_scroll
-        print(self.player.height)
+        self.total_screen_scroll += screen_scroll
+
         for tile in self.obstacle_list:
             tile[1][0] += screen_scroll
             if tile[1].y != tile[4] * self.TILE_SIZE:
                 tile[1].y = tile[4] * self.TILE_SIZE
+
+            self.ani_frame += 0.001
+
+            if tile[2] == 10 or tile[2] == 15:
+                tile[0] = tile_images[tile[2] + (round(self.ani_frame) % 4)]
+            
             screen.blit(tile[0], tile[1])
 
 # Load level
@@ -181,6 +197,9 @@ while run:
 
     mushroom_group.update((world))
     mushroom_group.draw(screen)
+
+    particle_group.update((world.total_screen_scroll))
+    particle_group.draw(screen)
 
     # Draw player
     world.player.update_animation()

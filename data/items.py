@@ -11,6 +11,13 @@ powerup_fx.set_volume(0.6)
 reserve_pwrup_fx = pygame.mixer.Sound('data/assets/sounds/effects/reserve.mp3')
 reserve_pwrup_fx.set_volume(0.6)
 
+# Images
+coin_images = []
+for x in range(19,23):
+    img = pygame.image.load(f'data/assets/tiles/{x}.png')
+    img = pygame.transform.scale(img, (img.get_width()*0.8, img.get_height()*0.8))
+    coin_images.append(img)
+
 class Decoration(pygame.sprite.Sprite):
     def __init__(self, img, x, y, tile_size):
         pygame.sprite.Sprite.__init__(self)
@@ -76,3 +83,31 @@ class Mushroom(pygame.sprite.Sprite):
 
         self.rect.x += self.direction
         self.rect.y += dy
+
+class CoinParticle(pygame.sprite.Sprite):
+    def __init__(self, tile, tile_size, screen_scroll):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.ani_frame = 0
+
+        self.x = tile[3]*tile_size
+
+        self.image = coin_images[round(self.ani_frame)]
+        self.rect = self.image.get_rect()
+        self.rect.x = (tile[3]*tile_size)+ screen_scroll
+        self.rect.y = (tile[4]*tile_size) - (tile_size)
+
+        self.vel_y = -12
+
+    def update(self, screen_scroll):
+        self.rect.x = self.x+screen_scroll
+
+        self.image = coin_images[round(self.ani_frame) % len(coin_images)]
+
+        self.ani_frame += 0.25
+
+        self.rect.y += self.vel_y
+        self.vel_y += 1
+
+        if self.vel_y > 13:
+            self.kill()

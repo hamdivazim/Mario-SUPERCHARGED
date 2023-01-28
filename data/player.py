@@ -8,6 +8,9 @@ pygame.init()
 sprout_fx = pygame.mixer.Sound('data/assets/sounds/effects/sprout.mp3')
 sprout_fx.set_volume(0.6)
 
+coin_fx = pygame.mixer.Sound('data/assets/sounds/effects/coin.mp3')
+coin_fx.set_volume(0.6)
+
 # Game vars
 GRAVITY  = 0.75
 
@@ -154,7 +157,10 @@ class Mario(pygame.sprite.Sprite):
 
         # Jump
         if self.jump == True and self.in_air == False:
-            self.vel_y = -16
+            if self.power > 0:
+                self.vel_y = -18
+            else:
+                self.vel_y = -16
             self.jump = False
             self.in_air = True
         
@@ -186,6 +192,13 @@ class Mario(pygame.sprite.Sprite):
                         sprout_fx.play()
                         world.sprout_mushroom(tile, self.rect.x, tile_size)
 
+                    if tile[2] == 15:
+                        tile[2] = 14
+                        tile[0] = world.tile_images[14]
+                        tile[1].y -= 15
+                        coin_fx.play()
+                        world.spawn_coin_particle(tile)
+
                 # Falling
                 elif self.vel_y >= 0:
                     self.vel_y = 0
@@ -193,9 +206,8 @@ class Mario(pygame.sprite.Sprite):
                     dy = tile[1].top - self.rect.bottom
                     if self.power > 0:
                         dy += 8
-
-                        if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
-                            dy -= 8
+                        while tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
+                            dy -= 1
 
         self.rect.x += dx
         self.rect.y += dy
