@@ -11,6 +11,9 @@ sprout_fx.set_volume(0.6)
 coin_fx = pygame.mixer.Sound('data/assets/sounds/effects/coin.mp3')
 coin_fx.set_volume(0.6)
 
+powerdown_fx = pygame.mixer.Sound('data/assets/sounds/effects/powerdown.mp3')
+powerdown_fx.set_volume(0.3)
+
 # Game vars
 GRAVITY  = 0.75
 
@@ -253,5 +256,30 @@ class Mario(pygame.sprite.Sprite):
             self.index_frame = 0
             self.update_time = pygame.time.get_ticks()
 
+    def bounce_off_enemy(self):
+        self.vel_y = -16
+        self.in_air = True
+
+    def power_down(self):
+        if self.power == 0:
+            # Player life lost
+            powerdown_fx.play()
+        else:
+            self.power -= 1
+            if self.power == 0:
+                self.update_animation()
+                self.rect = self.image.get_rect()
+                self.width = self.image.get_width()
+                self.height = self.image.get_height()
+                self.rect.x = self.x
+                self.rect.y = self.y
+                if not self.in_air:
+                    self.rect.y -= 26
+
+            powerdown_fx.play()
+
     def draw(self, screen):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+
+        if abs(self.vel_y) > 1:
+            self.in_air = True

@@ -40,7 +40,7 @@ jump_fx.set_volume(0.6)
 ROWS = 16
 COLS = 150
 TILE_SIZE = SCREEN_HEIGHT // ROWS
-TILE_TYPES = 23
+TILE_TYPES = 24
 world = 1
 level = 1
 
@@ -66,6 +66,7 @@ def draw_bg():
 decor_group = pygame.sprite.Group()
 mushroom_group = pygame.sprite.Group()
 particle_group = pygame.sprite.Group()
+enemy_group = pygame.sprite.Group()
 
 # Classes
 class TileSprite(pygame.sprite.Sprite):
@@ -122,6 +123,9 @@ class World():
                         self.obstacle_list.append(tile_data)
                     elif tile == 15:
                         self.obstacle_list.append(tile_data)
+                    elif tile == 23:
+                        enemy = items.GreenKoopa(x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE)
+                        enemy_group.add(enemy)
 
     def sprout_mushroom(self, tile, x, tile_size):
         mushroom = items.Mushroom(x, ((tile[4]-1)*tile_size), tile_size)
@@ -201,7 +205,10 @@ while run:
     particle_group.update((world.total_screen_scroll))
     particle_group.draw(screen)
 
-    # Draw player
+    enemy_group.update((world))
+    enemy_group.draw(screen)
+
+    # Draw player 
     world.player.update_animation()
     world.player.draw(screen)
 
